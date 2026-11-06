@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Repeated Subtraction in Other Bases</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#18253a;background:#f5f7fb}*{box-sizing:border-box}body{margin:0;padding:20px}.app{max-width:850px;margin:auto}.card{background:white;border:1px solid #d9e1eb;border-radius:16px;padding:18px;margin:12px 0;box-shadow:0 2px 8px #152b4310}h1{font-size:clamp(22px,4vw,30px);margin:0 0 8px;text-align:center}.sub{color:#5e6d81;font-size:13px;text-align:center}button:focus-visible{outline:3px solid #7268e4;outline-offset:2px}
+.badge{display:block;width:max-content;margin:0 auto 6px;padding:6px 16px;border-radius:999px;background:#eeeafe;color:#5144c6;font-weight:800;font-size:18px}
+.cap{text-align:center;color:#5e6d81;font-weight:700;font-size:14px;margin:0 0 6px}
+.ld{display:grid;grid-template-columns:auto 30px 112px auto;justify-content:center;align-items:center;row-gap:8px;margin:10px auto;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700}
+.ld .dv{text-align:right;padding-right:8px;font-size:30px}
+.ld .bar{grid-column:2/4;text-align:right;border-top:3px solid #18253a;border-left:3px solid #18253a;border-top-left-radius:14px;padding:6px 10px 4px 14px;font-size:30px}
+.ld .sign{text-align:right;padding-right:6px}
+.ld .val{text-align:right;padding:9px 10px;border:1px solid transparent}
+.ld input{width:100%;font-size:26px;font-weight:700;padding:8px 10px;border:2px solid #7d8fa8;border-radius:9px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;background:#fff}
+.ld input:focus{outline:3px solid #7268e4;outline-offset:1px}
+.ld .line{grid-column:2/4;border-top:3px solid #18253a;height:0}
+.ld .gr{display:flex;align-items:center;gap:6px;padding-left:12px;font-size:20px;font-weight:600;color:#5e6d81;white-space:nowrap}
+.ld .gr input{width:84px;font-size:20px;padding:7px 8px}
+.ld .gr .val{padding:9px 0;color:#5e6d81}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.chk{border:1px solid #5144c6;border-radius:9px;background:#5144c6;color:#fff;padding:10px 16px;font-size:16px;font-weight:700;cursor:pointer}
+.chk.alt{background:#fff;color:#5144c6}
+.chk:disabled{opacity:.4;cursor:not-allowed}
+.action{border:1px solid #5144c6;border-radius:9px;background:#5144c6;color:white;padding:11px 14px;font-weight:650;cursor:pointer}
+[hidden]{display:none!important}
+.stage{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:20px 36px}
+.sum{display:grid;grid-template-columns:112px auto 92px;column-gap:10px;align-items:center;padding-top:6px;font-variant-numeric:tabular-nums;font-size:26px;font-weight:700}
+.sumcol{grid-column:1;max-height:380px;overflow-y:auto}
+.sr{display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:9px 12px 9px 4px}
+.sr .op{width:22px;text-align:right;color:#5e6d81}
+.sumline{grid-column:1;border-top:3px solid #18253a;margin:2px 0 10px}
+.sumform,.sumrow{display:contents}
+.sumform .fb{grid-area:5/1/6/4;justify-self:end;text-align:right;font-size:15px;font-weight:650;max-width:250px;margin-top:10px}
+.fb .bad{color:#b53a3a;margin-top:4px}.fb .good{color:#18845a;font-size:17px}
+.sumrow input.ok{border-color:#2e9e62;background:#f1faf5}.sumrow input.bad{border-color:#d05050;background:#fdf3f3}
+.sumcol{grid-row:1}.sumline{grid-row:2}.sumrow #q{grid-area:3/1}.sumrow .R{grid-area:3/2}.sumrow #r{grid-area:3/3}.sumform .action{grid-row:4}
+.sumform .action{grid-column:1/4;justify-self:end;margin-top:12px}
+.sumrow input{font-size:26px;font-weight:700;padding:8px 10px;border:2px solid #7d8fa8;border-radius:9px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;background:#fff;width:100%}
+.sumrow input:focus{outline:3px solid #7268e4;outline-offset:1px}
+.sumrow .R{color:#5e6d81}
+.msg{text-align:center;min-height:24px;font-weight:650;margin-top:10px;color:#bb3d3d}
+@media(max-width:450px){body{padding:10px}.card{padding:12px}}
+@media(max-width:430px){.ld{font-size:22px;grid-template-columns:auto 22px 96px auto}.ld .dv,.ld .bar{font-size:24px}.ld input{font-size:22px}.ld .gr{font-size:15px;padding-left:6px}.ld .gr input{width:62px;font-size:16px}}
+</style>
+</head>
+<body><main class="app">
+<h1>Repeated Subtraction in Other Bases</h1><div class="sub">Subtract groups of the divisor until nothing more fits. Choose any number of groups you like.</div>
+<section class="card"><span class="badge" id="badge"></span><div class="cap" id="cap"></div>
+<div class="stage" id="stage"><div class="ld" id="ld"></div>
+<div class="sum" id="sum" hidden><div class="sumcol" id="sumcol"></div><div class="sumline"></div>
+<form id="form" class="sumform"><div class="sumrow"><input id="q" inputmode="numeric" autocomplete="off" aria-label="Quotient: the sum of your groups"><span class="R">R</span><input id="r" inputmode="numeric" autocomplete="off" aria-label="Remainder"></div><button class="action" type="submit" id="submit">Submit</button><div class="fb" id="feedback" role="status" aria-live="polite"></div></form></div></div>
+<div class="btns" id="ctl"><button class="chk" id="chk" type="button">Check</button><button class="chk alt" id="show" type="button">Show me</button><button class="chk alt" id="undo" type="button">Undo</button></div>
+<div class="msg" id="msg" role="status" aria-live="polite"></div>
+</section>
+<div style="text-align:center;margin-top:14px"><button id="next" type="button" class="action">New problem &#8635;</button></div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const WORD=['','','','three','four','five','six','seven','eight'];
+// Numbers are kept as ordinary values; S() writes one as a numeral in the current base, P() reads a numeral typed by the student.
+let base=5,dividend=0,d=0,rows=[],wasFin=false,lastKey='',lastBase=0;
+const S=n=>n.toString(base);
+const P=s=>parseInt(s,base);
+const before=i=>i===0?dividend:rows[i-1].diff;
+const last=()=>rows[rows.length-1];
+const stage=()=>(!last()||last().diff!==null)?'prod':'diff';
+const leftNow=()=>last()?last().diff:dividend;
+const fin=()=>stage()==='prod'&&leftNow()<d;
+const digitMsg=()=>`In base ${base}, only the digits 0 to ${base-1} are used.`;
+// Only the digits that exist in this base can be typed; anything else is dropped with a reminder.
+const baseDigits=el=>el.addEventListener('input',()=>{
+ const only=[...el.value].filter(c=>c>='0'&&c<='9');
+ const ok=only.filter(c=>+c<base),dropped=only.length>ok.length;
+ const clean=ok.join('').slice(0,5),m=$('msg');
+ if(dropped)m.textContent=digitMsg();else if(m.textContent===digitMsg())m.textContent='';
+ if(clean!==el.value)el.value=clean;});
+function render(focus=true){
+ const f0=fin();const becoming=f0&&!wasFin;wasFin=f0;
+ const oldLd=becoming?$('ld').getBoundingClientRect():null;
+ const oldSrc=becoming?[...document.querySelectorAll('#ld .gr .val')].map(e=>e.getBoundingClientRect()):[];
+ let h=`<div class="dv">${S(d)}</div><div class="bar">${S(dividend)}</div><div></div>`;
+ rows.forEach((r,i)=>{
+  h+=`<div></div><div class="sign">−</div><div class="val">${S(r.product)}</div><div class="gr"><span>(</span><span class="val">${S(r.groups)}</span><span>${r.groups===1?'group':'groups'})</span></div>`;
+  h+=`<div></div><div class="line"></div><div></div>`;
+  if(r.diff!==null)h+=`<div></div><div></div><div class="val">${S(r.diff)}</div><div></div>`;
+  else h+=`<div></div><div></div><div><input id="inDiff" inputmode="numeric" autocomplete="off" aria-label="Difference"></div>`;
+ });
+ if(stage()==='prod'&&!fin()){
+  h+=`<div></div><div class="sign">−</div><div><input id="inProd" inputmode="numeric" autocomplete="off" aria-label="Product to subtract"></div><div class="gr"><span>(</span><input id="inGrp" inputmode="numeric" autocomplete="off" aria-label="Number of groups"><span>groups)</span></div>`;
+ }
+ $('ld').innerHTML=h;
+ ['inProd','inGrp','inDiff'].forEach(id=>{const el=$(id);if(el)baseDigits(el);});
+ const f=fin();
+ $('sum').hidden=!f;$('ctl').hidden=f;
+ $('undo').disabled=!rows.length;
+ if(f){buildSum();if(becoming)flip(oldLd,oldSrc);}
+ if(stage()==='diff'){$('inDiff').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();check();}};if(focus)$('inDiff').focus();}
+ else if($('inProd')){
+  $('inProd').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();if($('inGrp').value)check();else $('inGrp').focus();}};
+  $('inGrp').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();if($('inProd').value)check();else $('inProd').focus();}};
+  if(focus)$('inProd').focus();}
+ else if(f&&focus)setTimeout(()=>$('q').focus(),500);
+}
+function buildSum(){
+ $('sumcol').innerHTML=rows.map((r,i)=>`<div class="sr"><span class="op">${i===rows.length-1&&rows.length>1?'+':''}</span><span class="n">${S(r.groups)}</span></div>`).join('');}
+function flip(oldLd,oldSrc){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const ld=$('ld').getBoundingClientRect();
+ const dx=oldLd.left-ld.left,dy=oldLd.top-ld.top;
+ if(dx||dy)$('ld').animate([{transform:`translate(${dx}px,${dy}px)`},{transform:'none'}],{duration:550,easing:'ease-in-out'});
+ [...document.querySelectorAll('#sumcol .n')].forEach((el,i)=>{const s=oldSrc[i];if(!s)return;const r=el.getBoundingClientRect();
+  el.animate([{transform:`translate(${s.right-r.right}px,${s.top-r.top}px)`,opacity:.2},{transform:'none',opacity:1}],{duration:700,delay:200+i*90,easing:'ease-in-out',fill:'backwards'});});
+ const rest=[document.querySelector('.sumline'),$('form')];
+ rest.forEach(el=>el.animate([{opacity:0},{opacity:1}],{duration:400,delay:350+rows.length*90,fill:'backwards'}));}
+function check(){
+ const m=$('msg');m.textContent='';$('feedback').textContent='';
+ if(stage()==='diff'){
+  const v=$('inDiff').value;if(v===''){m.textContent='Type the difference.';return;}
+  const i=rows.length-1,exp=before(i)-rows[i].product;
+  if(P(v)!==exp){m.textContent=`Not quite. Try the subtraction again, in base ${base}.`;$('inDiff').select();return;}
+  rows[i].diff=exp;render();return;}
+ const pv=$('inProd').value,gv=$('inGrp').value;
+ if(pv===''){m.textContent='Type the number you want to subtract.';$('inProd').focus();return;}
+ if(gv===''||P(gv)<1){m.textContent='Type the number of groups (1 or more).';$('inGrp').focus();return;}
+ const p=P(pv),g=P(gv);
+ if(p!==g*d){m.textContent=`Check your multiplication in base ${base}: ${S(g)} × ${S(d)} is not ${S(p)}. Try again.`;$('inProd').select();return;}
+ if(p>leftNow()){m.textContent=`${S(p)} is more than the ${S(leftNow())} you have left. Try fewer groups.`;$('inGrp').select();return;}
+ rows.push({product:p,groups:g,diff:null});render();}
+// Show me: take the biggest group of 10, 100, ... (in this base) that still fits, or fill in the difference.
+function showMe(){
+ $('msg').textContent='';$('feedback').textContent='';
+ if(stage()==='diff'){const i=rows.length-1;$('inDiff').value=S(before(i)-rows[i].product);check();return;}
+ let g=1;while(g*base*d<=leftNow())g*=base;
+ $('inProd').value=S(g*d);$('inGrp').value=S(g);check();}
+function setup(a,b,bs){base=bs;dividend=a;d=b;rows=[];wasFin=false;
+ $('badge').textContent='base '+base;
+ $('cap').textContent=`Every number here is in base ${base}. In base ${base}, 10 stands for ${WORD[base]}.`;
+ ['q','r'].forEach(i=>{$(i).value='';$(i).classList.remove('ok','bad');});
+ $('msg').textContent='';$('feedback').textContent='';render();}
+['q','r'].forEach(i=>baseDigits($(i)));
+$('undo').onclick=()=>{$('msg').textContent='';$('feedback').textContent='';if(last()&&last().diff!==null)last().diff=null;else rows.pop();render();};
+$('chk').onclick=check;$('show').onclick=showMe;
+$('form').onsubmit=e=>{e.preventDefault();
+ const qv=$('q').value.trim(),rv=$('r').value.trim(),fb=$('feedback');
+ [$('q'),$('r')].forEach(i=>i.classList.remove('ok','bad'));
+ const line=(t,c)=>`<div class="${c}">${t}</div>`;
+ if(!qv){fb.innerHTML=line('Enter the quotient.','bad');$('q').focus();return;}
+ if(!rv){fb.innerHTML=line('Enter the remainder. Use 0 if nothing is left over.','bad');$('r').focus();return;}
+ const qOk=P(qv)===Math.floor(dividend/d),rOk=P(rv)===dividend%d;
+ $('q').classList.add(qOk?'ok':'bad');$('r').classList.add(rOk?'ok':'bad');
+ let h='';
+ if(qOk&&rOk)h=line('✓ Correct! Great work.','good');
+ else{if(!qOk)h+=line(`Add up all your groups, in base ${base}, to find the quotient.`,'bad');if(!rOk)h+=line('The remainder is what is left over.','bad');}
+ fb.innerHTML=h;};
+
+/* ---------- picking a problem: base 3 to 8, all numbers written in that base ---------- */
+function newProblem(){
+ let bs,a,b,key;
+ do{
+  do{bs=rnd(3,8);}while(bs===lastBase);
+  // divisor: usually two digits (not a multiple of the base, so it is never just "10"), sometimes one digit
+  b=Math.random()<.75?rnd(bs,bs*bs-1):rnd(2,bs-1);
+  if(b%bs===0&&b>=bs)b+=1;
+  // dividend: three or four digits, at least 5 times the divisor so several groups are needed
+  const lo=Math.random()<.5?bs**3:bs**2,hi=lo===bs**3?bs**4-1:bs**3-1;
+  a=rnd(lo,hi);if(Math.random()<.4)a-=a%b;
+  key=bs+':'+a+':'+b;
+ }while(a<5*b||a<bs**2||a>=bs**4||key===lastKey);
+ lastKey=key;lastBase=bs;setup(a,b,bs);}
+$('next').onclick=newProblem;
+
+// optional: ?base=5&a=2341&b=23 in the URL sets the problem (a and b are written in that base)
+const U=new URLSearchParams(location.search),ub=parseInt(U.get('base'),10);
+const okNum=(s,bs)=>typeof s==='string'&&s!==''&&[...s].every(c=>/[0-9]/.test(c)&&+c<bs);
+if(ub>=3&&ub<=8&&okNum(U.get('a'),ub)&&okNum(U.get('b'),ub)&&parseInt(U.get('b'),ub)>=2&&parseInt(U.get('a'),ub)>=parseInt(U.get('b'),ub)){
+ lastBase=ub;setup(parseInt(U.get('a'),ub),parseInt(U.get('b'),ub),ub);
+}else newProblem();
+})();
+</script></body></html>
